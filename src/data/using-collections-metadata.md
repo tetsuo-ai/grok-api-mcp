@@ -82,7 +82,6 @@ document = client.collections.upload_document(
     collection_id="collection_xxx",
     name="paper.pdf",
     data=file_data,
-    content_type="application/pdf",
     fields={
         "author": "Sandra Kim",
         "year": "2024",
