@@ -204,7 +204,7 @@ response = client.chat.completions.create(
 | Resource | Limit |
 |----------|-------|
 | Max file size | 100 MB |
-| Max files (global) | 100,000 |
+| Max files per collection | 100,000 |
 | Max total storage | 100 GB |
 | Max collections | Unlimited |
 

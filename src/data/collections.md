@@ -52,7 +52,7 @@ Your files and their embedding index are **securely encrypted** and stored on xA
 | Limit | Value |
 |-------|-------|
 | Maximum file size | 100 MB |
-| Maximum number of files | 100,000 files (globally) |
+| Maximum files per collection | 100,000 |
 | Maximum total size | 100 GB |
 
 [Contact xAI](https://x.ai/contact) to increase any of these limits.

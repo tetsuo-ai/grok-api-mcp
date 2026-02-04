@@ -143,7 +143,7 @@ response = client.chat.completions.create(
 | Limit | Value |
 |-------|-------|
 | Max file size | 100 MB |
-| Max files | 100,000 (global) |
+| Max files per collection | 100,000 |
 | Max total storage | 100 GB |
 
 Contact xAI to increase limits.
