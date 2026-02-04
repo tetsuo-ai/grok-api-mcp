@@ -78,7 +78,12 @@ print(collection)
 
 ## Uploading Documents
 
-Upload documents to a collection by providing the file data and name. The SDK automatically handles content type detection.
+Uploading a document to a collection is a two-step process:
+
+1. Upload the file to the xAI API
+2. Add the uploaded file to your collection
+
+The SDK abstracts this into a single `upload_document` call that handles both steps automatically.
 
 ### Using xAI SDK
 
@@ -129,7 +134,7 @@ print(document)
 
 ## Searching Documents
 
-You can search documents using the SDK or REST API. See the [Collections Search Tool](./collections-search-tool.md) guide for using collections in chat.
+You can search documents using the SDK or REST API. You can also search documents using the Responses API with the `file_search` tool. See the [Collections Search Tool](./collections-search-tool.md) guide for more details.
 
 ### Using xAI SDK
 
