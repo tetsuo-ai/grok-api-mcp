@@ -4,20 +4,20 @@ Generate and edit videos using the Grok Imagine API - xAI's unified video-audio 
 
 ## Overview
 
-The Grok Imagine API is designed for end-to-end creative workflows with:
-- **Native audio-video generation** - Synchronized audio without separate tools
-- **10-second videos at 720p** - High quality output
-- **Image-to-video** - Bring static images to life
-- **Text-to-video** - Generate from text prompts
-- **Video editing** - Restyle scenes, add/remove objects, control motion
-- **Best-in-class instruction following**
-
 All video generation/edit requests are **deferred requests**:
 1. Send a video generation/edit request
 2. Receive a response with a request ID
 3. Retrieve the video result later using the request ID
 
-If you're using the SDK, it can handle the polling automatically.
+If you're using the xAI SDK, it can handle the polling automatically with `client.video.generate()`.
+
+### Key Features
+
+- **Native audio-video generation** - Synchronized audio without separate tools
+- **Up to 15-second videos at 720p** - High quality output
+- **Image-to-video** - Bring static images to life
+- **Text-to-video** - Generate from text prompts
+- **Video editing** - Restyle scenes, add/remove objects, control motion
 
 ## Pricing
 
@@ -25,7 +25,123 @@ If you're using the SDK, it can handle the polling automatically.
 |---------|------|
 | Video generation (with audio) | $4.20/minute |
 
-## Video Generation
+## Video Generation with Automatic Polling
+
+The xAI SDK can automatically poll for results until the video is ready:
+
+### Text-to-Video
+
+```python
+from xai_sdk import Client
+
+client = Client()
+
+response = client.video.generate(
+    prompt="A cat playing with a ball",
+    model="grok-imagine-video",
+)
+print(f"Video URL: {response.url}")
+```
+
+### Image-to-Video
+
+Generate a video from an existing image:
+
+```python
+from xai_sdk import Client
+
+client = Client()
+
+response = client.video.generate(
+    prompt="Generate a video based on the provided image.",
+    model="grok-imagine-video",
+    image_url="<url of the image>",
+)
+print(f"Video URL: {response.url}")
+```
+
+### Video Editing
+
+Edit an existing video with a prompt:
+
+```python
+from xai_sdk import Client
+
+client = Client()
+
+response = client.video.generate(
+    prompt="Make the ball larger.",
+    model="grok-imagine-video",
+    video_url="<url of the video to edit>",
+)
+print(f"Video URL: {response.url}")
+```
+
+## Manual Polling
+
+If you prefer to control the polling yourself, use `client.video.start()` to initiate generation and `client.video.get()` to retrieve results.
+
+### Start Video Generation
+
+```python
+from xai_sdk import Client
+
+client = Client()
+
+response = client.video.start(
+    prompt="A cat playing with a ball",
+    model="grok-imagine-video",
+)
+print(f"Request ID: {response.request_id}")
+```
+
+Response:
+```json
+{"request_id":"aa87081b-1a29-d8a6-e5bf-5807e3a7a561"}
+```
+
+### Image-to-Video (Manual)
+
+```python
+from xai_sdk import Client
+
+client = Client()
+
+response = client.video.start(
+    prompt="Generate a video based on the provided image.",
+    model="grok-imagine-video",
+    image_url="<url of the image>",
+)
+print(f"Request ID: {response.request_id}")
+```
+
+### Video Editing (Manual)
+
+```python
+from xai_sdk import Client
+
+client = Client()
+
+response = client.video.start(
+    prompt="Make the ball in the video larger.",
+    model="grok-imagine-video",
+    video_url="<url of the previous video>",
+)
+print(f"Request ID: {response.request_id}")
+```
+
+> **Note**: The input video URL must be a direct, publicly accessible link to the video file. The maximum supported video length for editing is **8.7 seconds**.
+
+### Retrieve Video Results
+
+After getting a `request_id`, retrieve the generated video:
+
+```python
+response = client.video.get(request_id)
+print(f"Video URL: {response.url}")
+```
+
+## REST API (OpenAI SDK Compatible)
 
 ### Endpoint
 
@@ -37,6 +153,8 @@ POST https://api.x.ai/v1/videos/generations
 
 ```python
 from openai import OpenAI
+import os
+import time
 
 client = OpenAI(
     api_key=os.environ.get("XAI_API_KEY"),
@@ -45,7 +163,7 @@ client = OpenAI(
 
 # Start generation
 response = client.videos.generate(
-    model="grok-video",
+    model="grok-imagine-video",
     prompt="A rocket launching into space with dramatic lighting"
 )
 
@@ -53,7 +171,6 @@ request_id = response.id
 print(f"Request ID: {request_id}")
 
 # Poll for result
-import time
 while True:
     result = client.videos.retrieve(request_id)
     if result.status == "completed":
@@ -66,113 +183,137 @@ while True:
     time.sleep(5)
 ```
 
-### Request Parameters
+## Video Output Parameters
+
+### Duration
+
+Specify video duration in seconds (1-15 seconds):
+
+```python
+from xai_sdk import Client
+
+client = Client()
+
+response = client.video.generate(
+    prompt="A cat playing with a ball",
+    model="grok-imagine-video",
+    duration=10
+)
+print(f"Video URL: {response.url}")
+print(f"Duration: {response.duration}")
+```
+
+Or with manual polling:
+
+```python
+response = client.video.start(
+    prompt="A cat playing with a ball",
+    model="grok-imagine-video",
+    duration=10
+)
+print(f"Request ID: {response.request_id}")
+```
+
+> **Note**: Video editing doesn't support user-defined `duration`. The edited video will have the same duration as the original video.
+
+### Aspect Ratio
+
+Specify the aspect ratio of the video. Default is `16:9`.
+
+**Supported aspect ratios:**
+- `16:9` - Widescreen landscape (default)
+- `9:16` - Widescreen portrait
+- `4:3` - Standard landscape
+- `3:4` - Standard portrait
+- `1:1` - Square
+- `3:2` - Classic landscape
+- `2:3` - Classic portrait
+
+```python
+from xai_sdk import Client
+
+client = Client()
+
+response = client.video.generate(
+    prompt="A cat playing with a ball",
+    model="grok-imagine-video",
+    aspect_ratio="4:3"
+)
+print(f"Video URL: {response.url}")
+```
+
+Or with manual polling:
+
+```python
+response = client.video.start(
+    prompt="A cat playing with a ball",
+    model="grok-imagine-video",
+    aspect_ratio="4:3"
+)
+print(f"Request ID: {response.request_id}")
+```
+
+### Resolution
+
+Select output resolution from supported options:
+
+**Supported resolutions:**
+- `720p` - HD quality
+- `480p` - Standard quality
+
+```python
+from xai_sdk import Client
+
+client = Client()
+
+response = client.video.generate(
+    prompt="A cat playing with a ball",
+    model="grok-imagine-video",
+    resolution="720p"
+)
+print(f"Video URL: {response.url}")
+```
+
+Or with manual polling:
+
+```python
+response = client.video.start(
+    prompt="A cat playing with a ball",
+    model="grok-imagine-video",
+    resolution="720p"
+)
+print(f"Request ID: {response.request_id}")
+```
+
+## Request Parameters
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `model` | string | Video model (`grok-imagine-video` or `grok-video`) |
+| `model` | string | Video model (`grok-imagine-video`) |
 | `prompt` | string | Text description of the video |
-| `duration` | number | Video duration in seconds (1-15 seconds) |
+| `duration` | number | Video duration in seconds (1-15) |
 | `aspect_ratio` | string | Video aspect ratio (default: `16:9`) |
+| `resolution` | string | Output resolution (`720p`, `480p`) |
+| `image_url` | string | Source image URL for image-to-video |
+| `video_url` | string | Source video URL for editing |
 
-### Response (Initial)
+## Response Format
 
-```json
-{
-  "id": "video_gen_abc123",
-  "status": "processing",
-  "created": 1699000000
-}
-```
-
-### Response (Completed)
+### Initial Response (Manual Polling)
 
 ```json
 {
-  "id": "video_gen_abc123",
-  "status": "completed",
-  "created": 1699000000,
-  "data": [
-    {
-      "url": "https://..."
-    }
-  ]
+  "request_id": "video_gen_abc123"
 }
 ```
 
-## Video Editing
+### Completed Response
 
-### Endpoint
-
-```
-POST https://api.x.ai/v1/videos/edits
-```
-
-### Basic Usage
-
-```python
-response = client.videos.edit(
-    model="grok-video",
-    video="https://example.com/video.mp4",
-    prompt="Add slow motion effect to the action scene"
-)
-```
-
-### Input Requirements
-
-- The input video URL must be a **direct, publicly accessible link** to the video file
-- Maximum supported video length: **8.7 seconds**
-
-### Edit Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `video` | string | URL to the source video |
-| `prompt` | string | Description of the edit |
-| `mask_video` | string | Optional mask video URL |
-
-## Async Handling with SDK
-
-The SDK can automatically handle polling:
-
-```python
-# SDK handles polling automatically
-response = client.videos.generate(
-    model="grok-video",
-    prompt="A timelapse of clouds moving over mountains",
-    wait_for_completion=True  # SDK polls until complete
-)
-
-video_url = response.data[0].url
-```
-
-## Manual Polling
-
-```python
-import time
-
-def generate_video_with_polling(client, prompt, max_wait=300):
-    # Start generation
-    response = client.videos.generate(
-        model="grok-video",
-        prompt=prompt
-    )
-
-    request_id = response.id
-    start_time = time.time()
-
-    # Poll for result
-    while time.time() - start_time < max_wait:
-        result = client.videos.retrieve(request_id)
-
-        if result.status == "completed":
-            return result.data[0].url
-        elif result.status == "failed":
-            raise Exception(f"Video generation failed: {result.error}")
-
-        time.sleep(5)
-
-    raise Exception("Video generation timed out")
+```json
+{
+  "url": "https://...",
+  "duration": 10
+}
 ```
 
 ## Best Practices
@@ -197,9 +338,14 @@ def generate_video_with_polling(client, prompt, max_wait=300):
 
 ## Limitations
 
-- Maximum generated video duration: 15 seconds
-- Maximum input video length for editing: 8.7 seconds
-- Edited videos have same duration as original (no user-defined duration)
+| Constraint | Value |
+|------------|-------|
+| Maximum generated video duration | 15 seconds |
+| Maximum input video length for editing | 8.7 seconds |
+| Edited video duration | Same as original (cannot specify custom duration) |
+| Supported resolutions | 720p, 480p |
+
+**Additional notes:**
 - Video URLs must be direct, publicly accessible links (not embedded players)
 - Streaming is NOT supported for video generation
 - Processing times vary based on complexity
@@ -208,15 +354,15 @@ def generate_video_with_polling(client, prompt, max_wait=300):
 
 ```python
 try:
-    response = client.videos.generate(
-        model="grok-video",
-        prompt="..."
+    response = client.video.generate(
+        prompt="...",
+        model="grok-imagine-video"
     )
 except Exception as e:
     if "invalid_url" in str(e):
         print("Invalid video URL format")
     elif "video_too_long" in str(e):
-        print("Video exceeds maximum length")
+        print("Video exceeds maximum length (8.7s for edits)")
     elif "rate_limit" in str(e):
         print("Rate limit exceeded")
     else:
@@ -224,6 +370,8 @@ except Exception as e:
 ```
 
 ## Status Values
+
+When using manual polling, check the status field:
 
 | Status | Description |
 |--------|-------------|
