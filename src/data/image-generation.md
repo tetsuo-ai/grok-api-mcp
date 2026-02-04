@@ -2,18 +2,36 @@
 
 Generate and edit images using Grok's image capabilities.
 
+> **Note**: You can also animate generated images using [video generation](./video-generation.md).
+
 ## Image Generation
 
-### Endpoint
+### With xAI SDK (Recommended)
 
-```
-POST https://api.x.ai/v1/images/generations
+The [xAI SDK](https://github.com/xai-org/xai-sdk-python) is the recommended way to generate images:
+
+```python
+import os
+from xai_sdk import Client
+
+client = Client(api_key=os.getenv('XAI_API_KEY'))
+
+response = client.image.sample(
+    model="grok-imagine-image",
+    prompt="A cat in a tree",
+    image_format="url"
+)
+
+print(response.url)
 ```
 
-### Basic Usage
+By default, `image_format` is `url` and the generated image will be available for download on xAI managed storage.
+
+### With OpenAI SDK
 
 ```python
 from openai import OpenAI
+import os
 
 client = OpenAI(
     api_key=os.environ.get("XAI_API_KEY"),
@@ -31,17 +49,25 @@ image_url = response.data[0].url
 print(image_url)
 ```
 
+### Endpoint
+
+```
+POST https://api.x.ai/v1/images/generations
+```
+
 ### Request Parameters
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `model` | string | Model to use (e.g., "grok-imagine-image") |
+| `model` | string | Model to use (`grok-imagine-image`) |
 | `prompt` | string | Text description of the image to generate |
-| `n` | integer | Number of images to generate (1-4) |
+| `n` | integer | Number of images to generate (1-10) |
 | `size` | string | Image size ("1024x1024", "1792x1024", "1024x1792") |
-| `quality` | string | Image quality ("standard", "hd") |
+| `aspect_ratio` | string | Alternative to size - e.g., "4:3", "16:9", "1:1" |
+| `response_format` | string | `url` (default) or `b64_json` |
 | `style` | string | Image style ("vivid", "natural") |
-| `response_format` | string | "url" or "b64_json" |
+
+> **Note**: The `quality` parameter is **not currently supported** by the xAI API.
 
 ### cURL Example
 
@@ -73,13 +99,37 @@ curl https://api.x.ai/v1/images/generations \
 
 ## Image Editing
 
+Edit existing images with prompts.
+
+### With xAI SDK
+
+```python
+import os
+import base64
+from xai_sdk import Client
+
+client = Client(api_key=os.getenv('XAI_API_KEY'))
+
+with open("cat-in-tree.jpg", "rb") as image_file:
+    image_bytes = image_file.read()
+    base64_string = base64.b64encode(image_bytes).decode("utf-8")
+
+response = client.image.sample(
+    model="grok-imagine-image",
+    image_url=f"data:image/jpeg;base64,{base64_string}",
+    prompt="Swap the cat in the picture with a dog."
+)
+
+print(response.url)
+```
+
 ### Endpoint
 
 ```
 POST https://api.x.ai/v1/images/edits
 ```
 
-### Basic Usage
+### With OpenAI SDK
 
 ```python
 response = client.images.edit(
@@ -98,7 +148,7 @@ edited_url = response.data[0].url
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `image` | file | Original image to edit (PNG, max 4MB) |
+| `image` | file/string | Original image to edit (file or base64 data URL) |
 | `mask` | file | Mask image indicating areas to edit (PNG) |
 | `prompt` | string | Description of the edit to make |
 | `n` | integer | Number of images to generate |
@@ -109,6 +159,113 @@ edited_url = response.data[0].url
 - Must be same dimensions as original image
 - Transparent areas indicate where to edit
 - Opaque areas will be preserved
+
+## Base64 Output
+
+Instead of getting a URL, you can receive base64-encoded image data:
+
+### With xAI SDK
+
+```python
+import os
+from xai_sdk import Client
+
+client = Client(api_key=os.getenv('XAI_API_KEY'))
+
+response = client.image.sample(
+    model="grok-imagine-image",
+    prompt="A cat in a tree",
+    image_format="base64"
+)
+
+print(response.image)  # returns the raw image bytes
+```
+
+### With REST API
+
+Set `"response_format": "b64_json"` in the request body. The response will contain a `b64_json` field with the encoded image.
+
+### With gRPC
+
+Set `"format": "IMG_FORMAT_BASE64"` in the request.
+
+## Generating Multiple Images
+
+Generate up to 10 images in one request:
+
+### With xAI SDK
+
+```python
+import os
+from xai_sdk import Client
+
+client = Client(api_key=os.getenv('XAI_API_KEY'))
+
+response = client.image.sample_batch(
+    model="grok-imagine-image",
+    prompt="A cat in a tree",
+    n=4,
+    image_format="url",
+)
+
+for image in response:
+    print(image.url)
+```
+
+### With OpenAI SDK
+
+```python
+response = client.images.generate(
+    model="grok-imagine-image",
+    prompt="A cat in a tree",
+    n=4
+)
+
+for img in response.data:
+    print(img.url)
+```
+
+## Setting Aspect Ratio
+
+Instead of fixed sizes, you can specify an aspect ratio:
+
+```python
+import os
+from xai_sdk import Client
+
+client = Client(api_key=os.getenv('XAI_API_KEY'))
+
+response = client.image.sample(
+    model="grok-imagine-image",
+    prompt="A cat in a tree",
+    aspect_ratio="4:3"
+)
+
+print(response.url)
+```
+
+### Supported Aspect Ratios
+
+- `1:1` - Square
+- `4:3` - Standard
+- `3:4` - Portrait standard
+- `16:9` - Widescreen landscape
+- `9:16` - Widescreen portrait
+- `3:2` - Classic photo landscape
+- `2:3` - Classic photo portrait
+
+## Size Options
+
+| Size | Aspect Ratio | Best For |
+|------|--------------|----------|
+| 1024x1024 | 1:1 | Square images, icons, avatars |
+| 1792x1024 | ~16:9 | Landscape, banners, headers |
+| 1024x1792 | ~9:16 | Portrait, mobile wallpapers |
+
+## Style Options
+
+- **vivid**: More dramatic, hyper-real images
+- **natural**: More realistic, less stylized
 
 ## Best Practices
 
@@ -129,24 +286,6 @@ edited_url = response.data[0].url
 3. **Describe lighting**: "soft lighting", "dramatic shadows", "golden hour"
 4. **Include composition details**: "close-up", "wide angle", "bird's eye view"
 5. **Mention mood/atmosphere**: "serene", "dramatic", "mysterious"
-
-## Size Options
-
-| Size | Aspect Ratio | Best For |
-|------|--------------|----------|
-| 1024x1024 | 1:1 | Square images, icons, avatars |
-| 1792x1024 | 16:9 | Landscape, banners, headers |
-| 1024x1792 | 9:16 | Portrait, mobile wallpapers |
-
-## Quality Options
-
-- **standard**: Faster generation, good for drafts
-- **hd**: Higher detail, better for final outputs
-
-## Style Options
-
-- **vivid**: More dramatic, hyper-real images
-- **natural**: More realistic, less stylized
 
 ## Rate Limits
 
