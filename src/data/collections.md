@@ -2,6 +2,23 @@
 
 Collections is xAI's state-of-the-art RAG (Retrieval-Augmented Generation) system built directly into the API. It serves as xAI's embeddings solution, allowing you to upload and search through entire datasets without managing indexing and retrieval infrastructure.
 
+## Core Concepts
+
+There are two entities within the Collections service:
+
+### File
+
+A `file` is a single entity of a user-uploaded file. Files are securely encrypted and stored on xAI's servers.
+
+### Collection
+
+A `collection` is a group of `files` linked together, with an embedding index for efficient retrieval. When you create a collection, you have the option to automatically generate embeddings for any files uploaded to that collection. You can then perform semantic search across files in multiple collections.
+
+**Key points:**
+- A single file can belong to **multiple collections**
+- A file must be part of **at least one collection**
+- Files can also be uploaded without adding them to a collection using the [Files API](./files-api.md)
+
 ## Overview
 
 Collections enable:
@@ -11,6 +28,16 @@ Collections enable:
 - **Enterprise knowledge bases** - From PDFs and Excel sheets to entire codebases
 - **State-of-the-art performance** - Matches or outperforms leading models in real-world RAG tasks across finance, legal, and coding domains
 
+## File Storage and Retrieval
+
+Visit the **Collections** tab on the [xAI Console](https://console.x.ai) to create a new collection. Once created, you can add files to the collection.
+
+Your files and their embedding index are **securely encrypted** and stored on xAI's servers. The index enables efficient retrieval of files during a relevance search.
+
+## Data Privacy
+
+**We do not use user data stored on Collections for model training purposes.**
+
 ## Pricing
 
 | Operation | Cost |
@@ -18,15 +45,17 @@ Collections enable:
 | File indexing & storage | Free (first week) |
 | Retrieval/searches | $2.50 per 1,000 searches |
 
-## Limits
+## Usage Limits
+
+> **Note**: To upload files and add to collections, you must have **credits in your account**.
 
 | Limit | Value |
 |-------|-------|
-| Maximum file size | 100MB |
+| Maximum file size | 100 MB |
 | Maximum number of files | 100,000 files (globally) |
-| Maximum total size | 100GB |
+| Maximum total size | 100 GB |
 
-Contact xAI to increase any of these limits.
+[Contact xAI](https://x.ai/contact) to increase any of these limits.
 
 ## SDK Requirements
 
@@ -39,6 +68,7 @@ To use the Collections API, you need to create a **Management API Key** with the
 ### Using Management API
 
 ```python
+import os
 import requests
 
 management_key = os.environ.get("XAI_MANAGEMENT_KEY")
@@ -101,13 +131,48 @@ response = client.chat.completions.create(
     tools=[
         {
             "type": "collections_search",
-            "collections": ["collection-id-123"]
+            "collections_search": {
+                "collection_ids": ["collection-id-123"]
+            }
         }
     ]
 )
 
 print(response.choices[0].message.content)
 ```
+
+### Using file_search Tool (Responses API)
+
+In the Responses API context, you can use the `file_search` tool:
+
+```python
+response = client.responses.create(
+    model="grok-4",
+    input=[
+        {"type": "input_text", "text": "What is our vacation policy?"}
+    ],
+    tools=[
+        {
+            "type": "file_search",
+            "file_search": {
+                "collection_ids": ["col_abc123"]
+            }
+        }
+    ]
+)
+```
+
+## Metadata Fields
+
+Collections support **metadata fields** — structured attributes you can attach to documents for enhanced retrieval and data integrity:
+
+- **Filtered retrieval** — Narrow search results to documents matching specific criteria (e.g., `author="Sandra Kim"`)
+- **Contextual embeddings** — Inject metadata into chunks to improve retrieval accuracy (e.g., prepending document title to each chunk)
+- **Data integrity constraints** — Enforce required fields or uniqueness across documents
+
+When creating a collection, define metadata fields with options like `required`, `unique`, and `inject_into_chunk` to control how metadata is validated and used during search.
+
+See [Collections Metadata](./using-collections-metadata.md) for details.
 
 ## Managing Collections
 
@@ -186,7 +251,9 @@ response = client.chat.completions.create(
     messages=[{"role": "user", "content": "What are the code review guidelines?"}],
     tools=[{
         "type": "collections_search",
-        "collections": [engineering_collection["id"]]
+        "collections_search": {
+            "collection_ids": [engineering_collection["id"]]
+        }
     }]
 )
 ```
@@ -206,7 +273,9 @@ response = client.chat.completions.create(
     messages=[{"role": "user", "content": "Customer asks: How do I reset my password?"}],
     tools=[{
         "type": "collections_search",
-        "collections": [support_collection["id"]]
+        "collections_search": {
+            "collection_ids": [support_collection["id"]]
+        }
     }]
 )
 ```
@@ -218,3 +287,12 @@ response = client.chat.completions.create(
 3. **Use descriptive names**: Make collection names self-explanatory
 4. **Monitor usage**: Track which collections are most queried
 5. **Access control**: Manage who can add/remove documents
+6. **Use metadata**: Add structured attributes for better filtering
+
+## Guides
+
+- [Using Collections](./using-collections.md) - Get started with creating collections and uploading documents
+- [Collections API](./using-collections-api.md) - Programmatically manage collections, upload files, and search documents
+- [Metadata Fields](./using-collections-metadata.md) - Attach structured metadata to documents for filtered retrieval
+- [Console Guide](./using-collections-console.md) - Create and manage collections through the xAI Console interface
+- [Collections API Reference](./collections-api-reference.md) - Full API endpoint reference

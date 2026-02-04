@@ -118,7 +118,7 @@ POST /v1/collections/{collection_id}/documents
 ```
 
 **Request**: multipart/form-data
-- `file`: Document file (PDF, TXT, DOCX, MD)
+- `file`: Document file
 
 **Response**:
 ```json
@@ -210,13 +210,157 @@ response = client.chat.completions.create(
 
 Contact xAI to increase limits.
 
-## Supported File Types
+## Supported MIME Types
 
-- PDF (.pdf)
-- Plain text (.txt)
-- Markdown (.md)
-- Word documents (.docx)
-- CSV (.csv)
+While any `UTF-8` encoded text file is supported, special file conversion and chunking techniques are available for the following MIME types:
+
+### Document Formats
+
+| MIME Type | Description |
+|-----------|-------------|
+| `application/pdf` | PDF documents |
+| `application/x-pdf` | PDF documents (alternate) |
+| `application/vnd.adobe.pdf` | Adobe PDF |
+| `application/msword` | Microsoft Word (legacy) |
+| `application/vnd.openxmlformats-officedocument.wordprocessingml.document` | Word (.docx) |
+| `application/vnd.oasis.opendocument.text` | OpenDocument Text |
+| `application/epub` | ePub books |
+| `application/epub+zip` | ePub books (zipped) |
+| `application/x-epub+zip` | ePub books (alternate) |
+| `application/rtf` | Rich Text Format |
+| `text/rtf` | Rich Text Format |
+
+### Spreadsheet Formats
+
+| MIME Type | Description |
+|-----------|-------------|
+| `application/vnd.ms-excel` | Microsoft Excel (legacy) |
+| `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` | Excel (.xlsx) |
+| `application/vnd.openxmlformats-officedocument.spreadsheetml.template` | Excel template |
+| `application/csv` | CSV files |
+| `text/csv` | CSV files |
+| `text/tab-separated-values` | TSV files |
+| `text/tsv` | TSV files |
+
+### Presentation Formats
+
+| MIME Type | Description |
+|-----------|-------------|
+| `application/vnd.openxmlformats-officedocument.presentationml.presentation` | PowerPoint (.pptx) |
+| `application/vnd.openxmlformats-officedocument.presentationml.slide` | PowerPoint slide |
+| `application/vnd.openxmlformats-officedocument.presentationml.slideshow` | PowerPoint slideshow |
+| `application/vnd.openxmlformats-officedocument.presentationml.template` | PowerPoint template |
+
+### Programming Languages
+
+| MIME Type | Description |
+|-----------|-------------|
+| `text/x-python` | Python |
+| `text/x-python-script` | Python script |
+| `text/x-script.python` | Python script (alternate) |
+| `text/javascript` | JavaScript |
+| `text/jsx` | JSX (React) |
+| `text/tsx` | TSX (TypeScript React) |
+| `application/typescript` | TypeScript |
+| `application/ecmascript` | ECMAScript |
+| `text/x-java` | Java |
+| `text/x-java-source` | Java source |
+| `application/ms-java` | Java (alternate) |
+| `text/x-c` | C |
+| `text/x-chdr` | C header |
+| `text/x-csrc` | C source |
+| `text/x-c++hdr` | C++ header |
+| `text/x-c++src` | C++ source |
+| `text/x-csharp` | C# |
+| `text/x-go` | Go |
+| `text/x-rust` | Rust |
+| `text/x-swift` | Swift |
+| `text/x-kotlin` | Kotlin |
+| `text/x-scala` | Scala |
+| `text/x-ruby-script` | Ruby |
+| `text/x-perl` | Perl |
+| `text/x-perl-script` | Perl script |
+| `text/php` | PHP |
+| `text/x-php` | PHP (alternate) |
+| `application/x-php` | PHP (alternate) |
+| `application/dart` | Dart |
+| `application/vnd.dart` | Dart (alternate) |
+| `text/x-lua` | Lua |
+| `text/x-tcl` | Tcl |
+| `text/x-d` | D |
+| `text/x-haskell` | Haskell |
+| `text/x-erlang` | Erlang |
+| `text/x-lisp` | Lisp |
+| `text/x-emacs-lisp` | Emacs Lisp |
+| `text/x-scheme` | Scheme |
+| `text/x-objcsrc` | Objective-C |
+| `text/x-pascal` | Pascal |
+| `text/x-vbasic` | Visual Basic |
+
+### Shell Scripts
+
+| MIME Type | Description |
+|-----------|-------------|
+| `application/x-sh` | Shell script |
+| `application/x-shellscript` | Shell script |
+| `text/x-sh` | Shell script |
+| `application/x-csh` | C shell |
+| `text/x-csh` | C shell |
+| `application/x-zsh` | Zsh |
+| `application/x-powershell` | PowerShell |
+
+### Markup & Data Formats
+
+| MIME Type | Description |
+|-----------|-------------|
+| `text/plain` | Plain text |
+| `text/markdown` | Markdown |
+| `text/x-r-markdown` | R Markdown |
+| `text/html` | HTML |
+| `application/xhtml` | XHTML |
+| `text/xml` | XML |
+| `application/xml` | XML |
+| `text/xml-dtd` | XML DTD |
+| `application/json` | JSON |
+| `text/yaml` | YAML |
+| `text/css` | CSS |
+| `text/x-sass` | Sass |
+| `text/x-scss` | SCSS |
+
+### Scientific & Technical
+
+| MIME Type | Description |
+|-----------|-------------|
+| `application/x-latex` | LaTeX |
+| `application/x-tex` | TeX |
+| `text/x-tex` | TeX |
+| `application/vnd.jupyter` | Jupyter notebooks |
+| `text/x-bibtex` | BibTeX |
+| `text/x-rst` | reStructuredText |
+| `text/x-asm` | Assembly |
+| `text/x-sql` | SQL |
+| `text/x-diff` | Diff/Patch files |
+
+### Other Formats
+
+| MIME Type | Description |
+|-----------|-------------|
+| `text/calendar` | iCalendar |
+| `text/x-vcalendar` | vCalendar |
+| `text/vcard` | vCard |
+| `text/vtt` | WebVTT subtitles |
+| `text/uri-list` | URI list |
+| `text/cache-manifest` | Cache manifest |
+| `text/troff` | Troff |
+| `text/n3` | N3/Notation3 |
+| `text/turtle` | Turtle (RDF) |
+| `text/x-coffeescript` | CoffeeScript |
+| `text/x-java-properties` | Java properties |
+| `application/vnd.ms-outlook` | Outlook messages |
+| `application/x-hwp` | Hangul Word Processor |
+| `application/x-hwp-v5` | Hangul Word Processor v5 |
+| `application/vnd.curl` | Curl |
+| `application/zip` | ZIP archives |
 
 ## Error Responses
 

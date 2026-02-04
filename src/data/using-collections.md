@@ -7,7 +7,7 @@ Upload and search through your documents by adding them to collections. Collecti
 Collections enable you to:
 
 - **Organize** - Create collections to group related documents
-- **Store** - Upload up to 100,000 files per collection
+- **Store** - Upload up to 100,000 files globally
 - **Search** - Query documents using natural language semantic search
 - **Customize** - Configure chunking, embedding, and metadata settings
 - **Manage** - List, update, and delete documents programmatically
@@ -104,7 +104,7 @@ response = client.chat.completions.create(
 | Resource | Limit |
 |----------|-------|
 | Max file size | 100 MB |
-| Max files per collection | 100,000 |
+| Max files (global) | 100,000 |
 | Max total storage | 100 GB |
 
 Contact xAI to increase limits.
