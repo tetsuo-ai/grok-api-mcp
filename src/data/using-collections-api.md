@@ -78,7 +78,7 @@ print(collection)
 
 ## Uploading Documents
 
-Uploading a document to a collection requires reading the file data and specifying the content type:
+Upload documents to a collection by providing the file data and name. The SDK automatically handles content type detection.
 
 ### Using xAI SDK
 
@@ -91,7 +91,6 @@ document = client.collections.upload_document(
     collection_id="collection_dbc087b1-6c99-493d-86c6-b401fee34a9d",
     name="tesla-20241231.html",
     data=file_data,
-    content_type="text/html",
 )
 print(document)
 ```
@@ -119,7 +118,6 @@ document = client.collections.upload_document(
     collection_id="collection_dbc087b1-6c99-493d-86c6-b401fee34a9d",
     name="paper.pdf",
     data=file_data,
-    content_type="application/pdf",
     fields={
         "author": "Sandra Kim",
         "year": "2024",
@@ -215,7 +213,6 @@ try:
         collection_id=collection_id,
         name="large_file.pdf",
         data=file_data,
-        content_type="application/pdf"
     )
 except Exception as e:
     if "file_too_large" in str(e):
