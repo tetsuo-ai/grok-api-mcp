@@ -245,13 +245,21 @@ Convert text to tokens.
 
 ### Voice (WebSocket)
 
-#### Voice Agent
+#### Voice Agent (Realtime)
 
 ```
-WSS wss://api.x.ai/v1/voice/agent
+WSS wss://api.x.ai/v1/realtime
 ```
 
-WebSocket endpoint for real-time voice conversations.
+WebSocket endpoint for real-time voice conversations. Only available in us-east-1 region.
+
+#### Ephemeral Token
+
+```
+POST https://api.x.ai/v1/realtime/client_secrets
+```
+
+Get ephemeral token for client-side voice authentication. Required for browser-based voice applications.
 
 ## Common Parameters
 
