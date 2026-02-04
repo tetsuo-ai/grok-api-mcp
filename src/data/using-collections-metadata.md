@@ -56,6 +56,7 @@ collection = client.collections.create(
 | `required` | Document uploads must include this field | `false` |
 | `unique` | Only one document in the collection can have a given value for this field | `false` |
 | `inject_into_chunk` | Prepends this field's value to every embedding chunk, improving retrieval by providing context | `false` |
+| `description` | Human-readable description of the field (optional) | - |
 
 ## Uploading Documents with Metadata
 
