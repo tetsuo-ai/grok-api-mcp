@@ -1,67 +1,59 @@
 # Using Collections in Console
 
-Create and manage collections through the xAI Console interface.
+This guide walks you through managing collections using the [xAI Console](https://console.x.ai) interface.
 
-## Overview
+## Creating a New Collection
 
-The xAI Console provides a user-friendly interface for:
-- Creating collections
-- Uploading documents
-- Managing collection contents
-- Testing collection queries
+1. Navigate to the **Collections** tab in the [xAI Console](https://console.x.ai)
+2. **Make sure you are in the correct team**
+3. Click on **"Create new collection"** to create a new collection
 
-## Accessing Collections
+### Embeddings Setting
 
-1. Log in to the xAI Console
-2. Navigate to **Collections** in the sidebar
-3. View your existing collections or create new ones
+You can choose to enable **generate embeddings on document upload** or not. We recommend leaving the generate embeddings setting **on** for optimal search performance.
 
-## Creating a Collection
+## Viewing and Editing Collection Configuration
 
-### Step 1: Click "Create Collection"
+You can view and edit the collection's configuration by clicking on **Edit Collection**.
 
-In the Collections section, click the "Create Collection" button.
+This opens a modal where you can:
+- View the current configuration
+- Change the collection name
+- Update the description
+- Modify the embeddings setting
 
-### Step 2: Configure Collection
+## Adding a Document to the Collection
 
-- **Name**: Give your collection a descriptive name
-- **Description**: Add an optional description
+1. Click on a collection in the collections table to view its documents
+2. Click **"Upload document"** to upload a new document
+3. Select one or more files from your computer
 
-### Step 3: Save
+### Supported Formats
 
-Click "Create" to save your new collection.
+- PDF (.pdf)
+- Plain text (.txt)
+- Word documents (.docx)
+- Markdown (.md)
+- And many more text-based formats
 
-## Uploading Documents
+### Document Details
 
-### Step 1: Select Collection
+Once the upload has completed, each document is given a **File ID**. You can view:
+- **File ID** - Unique identifier for the file
+- **Collection ID** - The collection this document belongs to
+- **Hash** - Document content hash
 
-Click on the collection you want to add documents to.
+To view these details, click on the document in the documents table.
 
-### Step 2: Upload Files
-
-- Click "Upload Documents" or drag and drop files
-- Select one or more files from your computer
-- Supported formats: PDF, TXT, DOCX, MD, and more
-
-### Step 3: Wait for Processing
+### Wait for Processing
 
 Documents are processed and indexed automatically. Processing time depends on document size and complexity.
 
-## Managing Documents
+## Deleting Documents and Collections
 
-### View Documents
+You can delete documents and collections by clicking on the **more button** (⋮) on the right side of the collections or documents table.
 
-- See all documents in a collection
-- View document metadata (name, size, upload date)
-- Check processing status
-
-### Delete Documents
-
-1. Select the document(s) to delete
-2. Click "Delete"
-3. Confirm deletion
-
-**Note**: Deleted documents cannot be recovered.
+**Note**: Deleted documents and collections cannot be recovered.
 
 ## Testing Queries
 
@@ -80,22 +72,29 @@ Documents are processed and indexed automatically. Processing time depends on do
 
 ## Collection Settings
 
-### Access Controls
-
-- View who has access to collections
-- Manage permissions (if available)
-
 ### Collection Info
 
 - View collection ID (needed for API calls)
 - See document count
 - Check storage usage
 
+### Access Controls
+
+- View who has access to collections
+- Manage permissions (if available)
+
 ## Using Collections in API
 
 After creating collections in the console, use them via API:
 
 ```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key=os.environ.get("XAI_API_KEY"),
+    base_url="https://api.x.ai/v1"
+)
+
 response = client.chat.completions.create(
     model="grok-4",
     messages=[
@@ -115,8 +114,9 @@ response = client.chat.completions.create(
 ## Finding Collection IDs
 
 1. Open the collection in console
-2. Look for "Collection ID" in settings or details
-3. Copy the ID (format: `col_xxxxx`)
+2. Click on a document in the collection
+3. The Collection ID is displayed in the document details
+4. Copy the ID (format: `collection_xxxxx`)
 
 ## Best Practices
 
@@ -142,9 +142,9 @@ response = client.chat.completions.create(
 
 | Limit | Value |
 |-------|-------|
-| Max file size | 100MB |
+| Max file size | 100 MB |
 | Max files | 100,000 (global) |
-| Max total storage | 100GB |
+| Max total storage | 100 GB |
 
 Contact xAI to increase limits.
 
