@@ -114,8 +114,15 @@
     },
     {
       "method": "WSS",
-      "path": "/v1/voice/agent",
-      "description": "WebSocket endpoint for real-time voice conversations",
+      "path": "/v1/realtime",
+      "description": "WebSocket endpoint for real-time voice conversations (Voice Agent API)",
+      "category": "voice",
+      "api": "inference"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/realtime/client_secrets",
+      "description": "Get ephemeral token for client-side voice authentication",
       "category": "voice",
       "api": "inference"
     },
