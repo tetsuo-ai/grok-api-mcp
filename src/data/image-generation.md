@@ -99,7 +99,7 @@ curl https://api.x.ai/v1/images/generations \
 
 ## Image Editing
 
-Edit existing images with prompts.
+Edit existing images with prompts. The Grok Imagine API supports sophisticated editing operations including object manipulation, scene transformation, and style changes.
 
 ### With xAI SDK
 
@@ -159,6 +159,120 @@ edited_url = response.data[0].url
 - Must be same dimensions as original image
 - Transparent areas indicate where to edit
 - Opaque areas will be preserved
+
+## Image Editing Operations
+
+### Add Objects
+
+Insert new objects into your images:
+
+```python
+response = client.image.sample(
+    model="grok-imagine-image",
+    image_url="data:image/jpeg;base64,...",
+    prompt="Add a hot air balloon in the sky."
+)
+```
+
+**Example prompts:**
+- "Add a vase of flowers on the table"
+- "Add sunglasses to the person"
+- "Add a mountain range in the background"
+
+### Remove Objects
+
+Eliminate unwanted elements with high precision:
+
+```python
+response = client.image.sample(
+    model="grok-imagine-image",
+    image_url="data:image/jpeg;base64,...",
+    prompt="Remove the person in the background."
+)
+```
+
+**Example prompts:**
+- "Remove the watermark"
+- "Remove the power lines from the sky"
+- "Remove all text from the image"
+
+### Swap Objects
+
+Replace objects while maintaining visual consistency:
+
+```python
+response = client.image.sample(
+    model="grok-imagine-image",
+    image_url="data:image/jpeg;base64,...",
+    prompt="Swap the wooden chair with a modern office chair."
+)
+```
+
+**Example prompts:**
+- "Replace the cat with a dog"
+- "Swap the red car with a blue motorcycle"
+- "Change the laptop to a vintage typewriter"
+
+### Scene Transformation
+
+Transform environment, weather, and lighting:
+
+```python
+response = client.image.sample(
+    model="grok-imagine-image",
+    image_url="data:image/jpeg;base64,...",
+    prompt="Transform the scene to a snowy winter setting."
+)
+```
+
+**Supported transformations:**
+- **Weather**: sunny, cloudy, rainy, snowy, foggy
+- **Time of day**: sunrise, golden hour, sunset, night
+- **Seasons**: spring, summer, autumn, winter
+
+**Example prompts:**
+- "Change from sunny to dramatic sunset lighting"
+- "Transform to autumn with falling leaves"
+- "Add fog and moody atmosphere"
+
+### Restyle / Remix
+
+Transform the visual style while preserving content:
+
+```python
+response = client.image.sample(
+    model="grok-imagine-image",
+    image_url="data:image/jpeg;base64,...",
+    prompt="Restyle as a watercolor painting."
+)
+```
+
+**Style options:**
+- Artistic: oil painting, watercolor, sketch, anime, pixel art
+- Photographic: vintage film, polaroid, HDR, black and white
+- Design: comic book, pop art, minimalist, retro
+
+**Example prompts:**
+- "Render as a Studio Ghibli anime style"
+- "Transform into a vintage 1950s photograph"
+- "Apply a cyberpunk neon aesthetic"
+
+### Color and Product Editing
+
+Fine-tuned control for commercial and product images:
+
+```python
+response = client.image.sample(
+    model="grok-imagine-image",
+    image_url="data:image/jpeg;base64,...",
+    prompt="Change the product color from black to rose gold."
+)
+```
+
+**Example prompts:**
+- "Change the shirt color from blue to red"
+- "Make the car metallic silver"
+- "Adjust lighting to better highlight the product"
 
 ## Base64 Output
 
