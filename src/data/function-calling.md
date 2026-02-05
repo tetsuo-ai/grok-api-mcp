@@ -637,6 +637,8 @@ def safe_execute(function_name: str, arguments: dict) -> dict:
 |-------|-------|
 | grok-4 | Recommended for function calling |
 | grok-4-fast | Faster, good for simpler functions |
+| grok-4-1-fast-reasoning | Optimized for agentic use |
+| grok-4-1-fast-non-reasoning | Fast without reasoning overhead |
 | grok-3 | Legacy support |
 
 ## Using with xAI SDK
