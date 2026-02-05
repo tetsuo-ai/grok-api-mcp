@@ -12,6 +12,8 @@ Once you've uploaded files, you can reference them in conversations using the `f
 
 Reference an uploaded file in a conversation to let the model search through it for relevant information.
 
+### Using xAI SDK
+
 ```python
 import os
 from xai_sdk import Client
@@ -47,6 +49,125 @@ print(f"\nUsage: {response.usage}")
 
 # Clean up
 client.files.delete(uploaded_file.id)
+```
+
+### Using OpenAI SDK
+
+```python
+import os
+from openai import OpenAI
+
+client = OpenAI(
+    api_key=os.getenv("XAI_API_KEY"),
+    base_url="https://api.x.ai/v1",
+)
+
+# Upload a file
+document_content = b"""Quarterly Sales Report - Q4 2024
+
+Revenue Summary:
+- Total Revenue: $5.2M
+- Year-over-Year Growth: +18%
+"""
+
+with open("temp_sales.txt", "wb") as f:
+    f.write(document_content)
+
+with open("temp_sales.txt", "rb") as f:
+    uploaded_file = client.files.create(file=f, purpose="assistants")
+
+# Create a chat with the file using Responses API
+response = client.responses.create(
+    model="grok-4-fast",
+    input=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "input_text", "text": "What was the total revenue in this report?"},
+                {"type": "input_file", "file_id": uploaded_file.id}
+            ]
+        }
+    ]
+)
+
+final_answer = response.output[-1].content[0].text
+
+print(f"Answer: {final_answer}")
+
+# Clean up
+client.files.delete(uploaded_file.id)
+```
+
+### Using REST API
+
+```bash
+# First upload the file
+FILE_ID=$(curl https://api.x.ai/v1/files \
+  -H "Authorization: Bearer $XAI_API_KEY" \
+  -F file=@sales_report.txt \
+  -F purpose=assistants | jq -r '.id')
+
+# Then use it in chat
+curl -X POST "https://api.x.ai/v1/responses" \
+  -H "Authorization: Bearer $XAI_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"model\": \"grok-4-fast\",
+    \"input\": [
+      {
+        \"role\": \"user\",
+        \"content\": [
+          {\"type\": \"input_text\", \"text\": \"What was the total revenue in this report?\"},
+          {\"type\": \"input_file\", \"file_id\": \"$FILE_ID\"}
+        ]
+      }
+    ]
+  }"
+```
+
+### Using Python Requests
+
+```python
+import os
+import requests
+
+api_key = os.getenv("XAI_API_KEY")
+headers = {
+    "Content-Type": "application/json",
+    "Authorization": f"Bearer {api_key}"
+}
+
+# Upload file first
+upload_url = "https://api.x.ai/v1/files"
+files = {"file": ("sales_report.txt", b"Total Revenue: $5.2M")}
+data = {"purpose": "assistants"}
+upload_response = requests.post(
+    upload_url,
+    headers={"Authorization": f"Bearer {api_key}"},
+    files=files,
+    data=data
+)
+file_id = upload_response.json()["id"]
+
+# Create chat with file using attachments
+chat_url = "https://api.x.ai/v1/responses"
+payload = {
+    "model": "grok-4-fast",
+    "input": [
+        {
+            "role": "user",
+            "content": "What was the total revenue in this report?",
+            "attachments": [
+                {
+                    "file_id": file_id,
+                    "tools": [{"type": "file_search"}]
+                }
+            ]
+        }
+    ]
+}
+response = requests.post(chat_url, headers=headers, json=payload)
+print(response.json())
 ```
 
 ## Streaming Chat with Files
@@ -308,34 +429,6 @@ The model will:
 - Execute the code in a sandboxed environment
 - Perform calculations and statistical analysis
 - Return the results and insights in the response
-
-## Using OpenAI SDK
-
-You can also use the OpenAI SDK for basic file chat:
-
-```python
-from openai import OpenAI
-
-client = OpenAI(
-    api_key=os.environ.get("XAI_API_KEY"),
-    base_url="https://api.x.ai/v1"
-)
-
-response = client.chat.completions.create(
-    model="grok-4",
-    messages=[
-        {
-            "role": "user",
-            "content": "What are the key points in this document?",
-            "attachments": [
-                {"file_id": "file-abc123"}
-            ]
-        }
-    ]
-)
-
-print(response.choices[0].message.content)
-```
 
 ## Automatic Document Search
 
